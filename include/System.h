@@ -175,6 +175,7 @@ public:
     // You can call this right after TrackMonocular (or stereo or RGBD)
     int GetTrackingState();
     std::vector<MapPoint*> GetTrackedMapPoints();
+    std::vector<MapPoint*> GetAllMapPoints();
     std::vector<cv::KeyPoint> GetTrackedKeyPointsUn();
 
     // For debugging
@@ -252,6 +253,7 @@ private:
     // Tracking state
     int mTrackingState;
     std::vector<MapPoint*> mTrackedMapPoints;
+    std::vector<MapPoint*> mMapPoints;
     std::vector<cv::KeyPoint> mTrackedKeyPointsUn;
     std::mutex mMutexState;
 
