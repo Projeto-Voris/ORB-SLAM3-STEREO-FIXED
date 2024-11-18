@@ -475,6 +475,12 @@ Sophus::SE3f System::TrackMonocular(const cv::Mat &im, const double &timestamp, 
     return Tcw;
 }
 
+std::vector<KeyFrame*> System::GetTrajectory()
+{
+    unique_lock<mutex> lock(mMutexMode);
+    std::vector<KeyFrame*>AllKeyFrames = mpAtlas->GetAllKeyFrames();
+    return AllKeyFrames;
+}
 
 
 void System::ActivateLocalizationMode()
