@@ -5,7 +5,7 @@ This repository is a modified version of [ORB_SLAM3](https://github.com/UZ-SLAML
 --- 
 
 ## Modification
-- Succesfully tested in **Ubuntu 20.04** and **ROS2 Foxy**(with OpenCV 4.2.0)
+- Succesfully tested in **Ubuntu 22.04** and **ROS2 Humble**(with OpenCV 4.5.4)
 - Update from C++11 to C++14
 - Fixed unexpected <span style="color:red">error</span> when start **STEREO** mode with **Rectified** camera type  
 
