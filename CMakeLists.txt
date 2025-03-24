@@ -29,7 +29,7 @@ else()
 endif()
 
 LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
-
+set(Pangolin_DIR "/home/voris/Pangolin")
 find_package(OpenCV 4.2)
    if(NOT OpenCV_FOUND)
       message(FATAL_ERROR "OpenCV > 4.2 not found.")
@@ -39,7 +39,7 @@ MESSAGE("OPENCV VERSION:")
 MESSAGE(${OpenCV_VERSION})
 
 find_package(Eigen3 3.1.0 REQUIRED)
-find_package(Pangolin REQUIRED)
+find_package(Pangolin REQUIRED) 
 find_package(realsense2)
 
 include_directories(
