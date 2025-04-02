@@ -558,9 +558,8 @@ namespace ORB_SLAM3 {
             else{
                 output << "Kannala-Brandt";
             }
-            
             if(settings.cameraType_ != Settings::Rectified){
-                output << "" << ": [";
+                output << ")" << ": [";
                 for(size_t i = 0; i < settings.originalCalib2_->size(); i++){
                     output << " " << settings.originalCalib2_->getParameter(i);
                 }
@@ -568,7 +567,7 @@ namespace ORB_SLAM3 {
             }
 
             if(!settings.vPinHoleDistorsion2_.empty()){
-                output << "\t-Camera 1 distortion parameters: [ ";
+                output << "\t-Camera 2 distortion parameters: [ ";
                 for(float d : settings.vPinHoleDistorsion2_){
                     output << " " << d;
                 }
