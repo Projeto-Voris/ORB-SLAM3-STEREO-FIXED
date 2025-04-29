@@ -30,25 +30,28 @@ endif()
 
 LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
 set(Pangolin_DIR "/home/voris/Pangolin")
-find_package(OpenCV 4.2)
-   if(NOT OpenCV_FOUND)
-      message(FATAL_ERROR "OpenCV > 4.2 not found.")
-   endif()
 
-MESSAGE("OPENCV VERSION:")
-MESSAGE(${OpenCV_VERSION})
-
+# Find dependencies
+find_package(OpenCV 4.2 REQUIRED)
 find_package(Eigen3 3.1.0 REQUIRED)
-find_package(Pangolin REQUIRED) 
+find_package(Pangolin REQUIRED)
+find_package(Boost 1.71 REQUIRED COMPONENTS filesystem system serialization)
 find_package(realsense2)
 
+# Boost diagnostics
+message(STATUS "Boost found: ${Boost_FOUND}")
+message(STATUS "Boost version: ${Boost_VERSION}")
+message(STATUS "Boost libraries: ${Boost_LIBRARIES}")
+message(STATUS "Boost include dirs: ${Boost_INCLUDE_DIRS}")
+
 include_directories(
-${PROJECT_SOURCE_DIR}
-${PROJECT_SOURCE_DIR}/include
-${PROJECT_SOURCE_DIR}/include/CameraModels
-${PROJECT_SOURCE_DIR}/Thirdparty/Sophus
-${EIGEN3_INCLUDE_DIR}
-${Pangolin_INCLUDE_DIRS}
+  ${PROJECT_SOURCE_DIR}
+  ${PROJECT_SOURCE_DIR}/include
+  ${PROJECT_SOURCE_DIR}/include/CameraModels
+  ${PROJECT_SOURCE_DIR}/Thirdparty/Sophus
+  ${EIGEN3_INCLUDE_DIR}
+  ${Pangolin_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
 )
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
@@ -69,25 +72,32 @@ add_library(${PROJECT_NAME} SHARED
 
 add_subdirectory(Thirdparty/g2o)
 
+# Main library linking - CORRIGIDO
 target_link_libraries(${PROJECT_NAME}
-${OpenCV_LIBS}
-${EIGEN3_LIBS}
-${Pangolin_LIBRARIES}
-${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
-${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
--lboost_serialization
--lcrypto
+  ${OpenCV_LIBS}
+  ${EIGEN3_LIBS}
+  ${Pangolin_LIBRARIES}
+  ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
+  ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
+  ${Boost_LIBRARIES}
+  -lcrypto
 )
 
-# If RealSense SDK is found the library is added and its examples compiled
+# RealSense specific configuration
 if(realsense2_FOUND)
-    include_directories(${PROJECT_NAME}
-    ${realsense_INCLUDE_DIR}
-    )
-    target_link_libraries(${PROJECT_NAME}
-    ${realsense2_LIBRARY}
-    )
+  include_directories(${realsense_INCLUDE_DIR})
+  target_link_libraries(${PROJECT_NAME} ${realsense2_LIBRARY})
 endif()
+
+# ============================================
+# Build examples section
+# ============================================
+
+# Helper function to simplify example building
+function(add_orbslam_example example_name source_file)
+  add_executable(${example_name} ${source_file})
+  target_link_libraries(${example_name} ${PROJECT_NAME})
+endfunction()
 
 
 # Build examples
