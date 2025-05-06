@@ -169,8 +169,13 @@ public:
 
     // TODO: Save/Load functions
     // SaveMap(const string &filename);
-    // LoadMap(const string &filename);
+    // LoadMap(const string &filename);	
 
+
+    void SaveMapPoints(const std::string &filename);
+    void SaveKeyFrameTrajectory(const std::string &filename);
+    void SaveAllData(const std::string &output_dir);
+    
     // Information from most recent processed frame
     // You can call this right after TrackMonocular (or stereo or RGBD)
     int GetTrackingState();

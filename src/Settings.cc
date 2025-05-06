@@ -17,16 +17,15 @@
 */
 
 #include "Settings.h"
-
 #include "CameraModels/Pinhole.h"
 #include "CameraModels/KannalaBrandt8.h"
-
 #include "System.h"
-
 #include <opencv2/core/persistence.hpp>
 #include <opencv2/core/eigen.hpp>
-
 #include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <boost/filesystem.hpp>
 
 using namespace std;
 
@@ -469,6 +468,101 @@ namespace ORB_SLAM3 {
             imageViewerScale_ = 1.0f;
     }
 
+   void System::SaveMapPoints(const std::string &filename) {
+    std::ofstream f;
+    if (filename.substr(filename.find_last_of(".") + 1) == "csv") {
+        f.open(filename);
+        f << std::fixed << std::setprecision(7);
+        f << "x,y,z,observations\n";  // Cabeçalho CSV
+    } else if (filename.substr(filename.find_last_of(".") + 1) == "ply") {
+        f.open(filename);
+        f << "ply\n";
+        f << "format ascii 1.0\n";
+        f << "element vertex " << mpAtlas->GetAllMapPoints().size() << "\n";
+        f << "property float x\n";
+        f << "property float y\n";
+        f << "property float z\n";
+        f << "property uchar red\n";
+        f << "property uchar green\n";
+        f << "property uchar blue\n";
+        f << "end_header\n";
+    }
+
+    if (!f.is_open()) {
+        std::cerr << "ERROR: Cannot open file " << filename << std::endl;
+        return;
+    }
+
+    std::vector<MapPoint*> vpMPs = mpAtlas->GetAllMapPoints();
+    for (size_t i = 0; i < vpMPs.size(); i++) {
+        MapPoint* pMP = vpMPs[i];
+        if (!pMP || pMP->isBad()) continue;
+
+        Eigen::Vector3f pos = pMP->GetWorldPos(); // Modificado aqui
+        if (filename.substr(filename.find_last_of(".") + 1) == "csv") {
+            f << pos(0) << "," << pos(1) << "," << pos(2) << "," // Modificado aqui
+              << pMP->GetFoundRatio() << "\n";
+        } else {
+            // PLY - adicionamos cor cinza padrão (128,128,128)
+            f << pos(0) << " " << pos(1) << " " << pos(2)  // Modificado aqui
+              << " 128 128 128\n";
+        }
+    }
+    f.close();
+    std::cout << "Map points saved to " << filename << std::endl;
+    }
+
+    void System::SaveKeyFrameTrajectory(const std::string &filename) {
+        std::ofstream f;
+        if (filename.substr(filename.find_last_of(".") + 1) == "csv") {
+            f.open(filename);
+            f << std::fixed << std::setprecision(7);
+            f << "timestamp,x,y,z,qx,qy,qz,qw\n";
+        } else {
+            f.open(filename);
+            f << std::fixed << std::setprecision(7);
+        }
+
+        std::vector<KeyFrame*> vpKFs = mpAtlas->GetAllKeyFrames();
+        std::sort(vpKFs.begin(), vpKFs.end(), KeyFrame::lId);
+
+        for (size_t i = 0; i < vpKFs.size(); i++) {
+            KeyFrame* pKF = vpKFs[i];
+            if (pKF->isBad()) continue;
+
+            Sophus::SE3f Twc = pKF->GetPoseInverse();
+            Eigen::Quaternionf q = Twc.unit_quaternion();
+            Eigen::Vector3f t = Twc.translation();
+
+            if (filename.substr(filename.find_last_of(".") + 1) == "csv") {
+                f << pKF->mTimeStamp << "," << t.x() << "," << t.y() << "," << t.z() << ","
+                  << q.x() << "," << q.y() << "," << q.z() << "," << q.w() << "\n";
+            } else {
+                f << std::setw(10) << pKF->mTimeStamp << " " << std::setw(7) << t.x() << " " 
+                  << std::setw(7) << t.y() << " " << std::setw(7) << t.z() << " "
+                  << q.x() << " " << q.y() << " " << q.z() << " " << q.w() << "\n";
+            }
+        }
+        f.close();
+        std::cout << "Keyframe trajectory saved to " << filename << std::endl;
+    }
+
+    
+
+    void System::SaveAllData(const std::string &output_dir) {
+        // Cria o diretório se não existir
+        boost::filesystem::create_directory(output_dir);
+        
+        // Salva em diferentes formatos
+        SaveMapPoints(output_dir + "/map_points.csv");
+        SaveMapPoints(output_dir + "/map_points.ply");
+        SaveKeyFrameTrajectory(output_dir + "/keyframe_trajectory.csv");
+        SaveKeyFrameTrajectory(output_dir + "/keyframe_trajectory.txt");
+        SaveTrajectoryKITTI(output_dir + "/trajectory_kitti.txt");
+        
+        std::cout << "All data saved to directory: " << output_dir << std::endl;
+    }
+
     void Settings::readLoadAndSave(cv::FileStorage &fSettings) {
         bool found;
 
@@ -558,9 +652,8 @@ namespace ORB_SLAM3 {
             else{
                 output << "Kannala-Brandt";
             }
-            
             if(settings.cameraType_ != Settings::Rectified){
-                output << "" << ": [";
+                output << ")" << ": [";
                 for(size_t i = 0; i < settings.originalCalib2_->size(); i++){
                     output << " " << settings.originalCalib2_->getParameter(i);
                 }
@@ -568,7 +661,7 @@ namespace ORB_SLAM3 {
             }
 
             if(!settings.vPinHoleDistorsion2_.empty()){
-                output << "\t-Camera 1 distortion parameters: [ ";
+                output << "\t-Camera 2 distortion parameters: [ ";
                 for(float d : settings.vPinHoleDistorsion2_){
                     output << " " << d;
                 }

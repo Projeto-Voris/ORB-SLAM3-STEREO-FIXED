@@ -1673,12 +1673,12 @@ void Tracking::PreintegrateIMU()
         if(bSleep)
             usleep(500);
     }
-
+    //TODO: check if why is outputting this
     const int n = mvImuFromLastFrame.size()-1;
     if(n==0){
         cout << "Empty IMU measurements vector!!!\n";
         return;
-    }
+    } 
 
     IMU::Preintegrated* pImuPreintegratedFromLastFrame = new IMU::Preintegrated(mLastFrame.mImuBias,mCurrentFrame.mImuCalib);
 
@@ -2344,7 +2344,7 @@ void Tracking::StereoInitialization()
                 return;
             }
 
-            if (!mFastInit && (mCurrentFrame.mpImuPreintegratedFrame->avgA-mLastFrame.mpImuPreintegratedFrame->avgA).norm()<0.5)
+            if (!mFastInit && (mCurrentFrame.mpImuPreintegratedFrame->avgA-mLastFrame.mpImuPreintegratedFrame->avgA).norm()<0.3)
             {
                 cout << "not enough acceleration" << endl;
                 return;
