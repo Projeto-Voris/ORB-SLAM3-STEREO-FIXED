@@ -678,6 +678,14 @@ namespace ORB_SLAM3 {
                 output << " " << settings.calibration1_->getParameter(i);
             }
             output << " ]" << endl;
+            if((settings.sensor_ == System::STEREO || settings.sensor_ == System::IMU_STEREO) &&
+                settings.cameraType_ == Settings::KannalaBrandt){
+                output << "\t-Camera 2 parameters after rectification: [ ";
+                for(size_t i = 0; i < settings.calibration2_->size(); i++){
+                    output << " " << settings.calibration2_->getParameter(i);
+                }
+                output << " ]" << endl;
+            }
         }
         else if(settings.bNeedToResize1_){
             output << "\t-Camera 1 parameters after resize: [ ";
