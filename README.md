@@ -15,7 +15,19 @@ Clone the repository:
 git clone https://github.com/Projeto-Voris/ORB-SLAM3-STEREO-FIXED.git ORB_SLAM3
 ```
 
-Install same required dependencies as original version. Then,  
+Install {Pangloin](https://github.com/stevenlovegrove/Pangolin) on version 0.9.2
+```
+# Clone Pangolin along with it's submodules
+cd ORB_SLAM3/Thirdparty
+git clone --recursive -b v0.9.2https://github.com/stevenlovegrove/Pangolin.git
+cd Pangolin
+# Install dependencies (as described above, or your preferred method)
+./scripts/install_prerequisites.sh recommended
+
+# Configure and build
+cmake -B build
+cmake --build build
+```
 Execute:
 ```
 cd ORB_SLAM3
