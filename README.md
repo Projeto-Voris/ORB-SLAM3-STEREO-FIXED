@@ -19,7 +19,7 @@ Install {Pangloin](https://github.com/stevenlovegrove/Pangolin) on version 0.9.2
 ```
 # Clone Pangolin along with it's submodules
 cd ORB_SLAM3/Thirdparty
-git clone --recursive -b v0.9.2https://github.com/stevenlovegrove/Pangolin.git
+git clone --recursive -b v0.9.2 https://github.com/stevenlovegrove/Pangolin.git
 cd Pangolin
 # Install dependencies (as described above, or your preferred method)
 ./scripts/install_prerequisites.sh recommended
